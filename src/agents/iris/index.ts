@@ -53,11 +53,17 @@ export async function runIris(): Promise<IrisRunResult> {
       textLength: scrapedPost.original_text.length,
     });
 
-    // 2. Set post status to 'processing'
-    await supabase
+    // 2. Set post status to 'processing' (with error check)
+    const { error: lockError } = await supabase
       .from('scraped_posts')
       .update({ status: 'processing' })
-      .eq('id', scrapedPost.id);
+      .eq('id', scrapedPost.id)
+      .eq('status', 'new'); // Optimistic lock — only update if still 'new'
+
+    if (lockError) {
+      irisLog('error', 'Failed to lock post', { post_id: scrapedPost.id, error: lockError.message });
+      throw new Error(`Failed to lock post: ${lockError.message}`);
+    }
 
     // 3. Fetch active voice samples
     const { data: samples } = await supabase
@@ -103,10 +109,14 @@ export async function runIris(): Promise<IrisRunResult> {
     }
 
     // 6. Mark scraped post as 'used'
-    await supabase
+    const { error: usedError } = await supabase
       .from('scraped_posts')
       .update({ status: 'used' })
       .eq('id', scrapedPost.id);
+
+    if (usedError) {
+      irisLog('error', 'Failed to mark post as used', { post_id: scrapedPost.id, error: usedError.message });
+    }
 
     const result: IrisRunResult = {
       success: true,

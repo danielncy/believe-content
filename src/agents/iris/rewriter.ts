@@ -4,7 +4,11 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { irisLog } from './logger';
 
-const anthropic = new Anthropic();
+let _anthropic: Anthropic | null = null;
+function getAnthropicClient() {
+  if (!_anthropic) _anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  return _anthropic;
+}
 
 interface RewriteResult {
   rewrittenText: string;
@@ -53,7 +57,7 @@ export async function rewritePost(
     sampleCount: voiceSamples.length,
   });
 
-  const response = await anthropic.messages.create({
+  const response = await getAnthropicClient().messages.create({
     model: 'claude-opus-4-6',
     max_tokens: 2048,
     messages: [{ role: 'user', content: userMessage }],
