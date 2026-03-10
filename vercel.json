@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/scout/run",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/imagen/run",
+      "schedule": "15 */2 * * *"
+    },
+    {
+      "path": "/api/phantom/run",
+      "schedule": "30 */2 * * *"
+    }
+  ]
+}
