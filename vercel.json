@@ -2,15 +2,15 @@
   "crons": [
     {
       "path": "/api/scout/run",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 8 * * *"
     },
     {
       "path": "/api/imagen/run",
-      "schedule": "15 */2 * * *"
+      "schedule": "0 9 * * *"
     },
     {
       "path": "/api/phantom/run",
-      "schedule": "30 */2 * * *"
+      "schedule": "0 10 * * *"
     }
   ]
 }
