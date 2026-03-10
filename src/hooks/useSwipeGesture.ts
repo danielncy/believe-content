@@ -16,6 +16,7 @@ export function useSwipeGesture({ onSwipeLeft, onSwipeRight, onTap }: SwipeHandl
   const startY = useRef(0);
   const currentX = useRef(0);
   const swiping = useRef(false);
+  const touchHandled = useRef(false);
   const elementRef = useRef<HTMLDivElement>(null);
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
@@ -23,6 +24,7 @@ export function useSwipeGesture({ onSwipeLeft, onSwipeRight, onTap }: SwipeHandl
     startY.current = e.touches[0].clientY;
     currentX.current = 0;
     swiping.current = true;
+    touchHandled.current = true;
   }, []);
 
   const onTouchMove = useCallback((e: React.TouchEvent) => {
@@ -83,8 +85,17 @@ export function useSwipeGesture({ onSwipeLeft, onSwipeRight, onTap }: SwipeHandl
     }
   }, [onSwipeLeft, onSwipeRight, onTap]);
 
+  const onClick = useCallback(() => {
+    // Desktop fallback — skip if touch already handled this interaction
+    if (touchHandled.current) {
+      touchHandled.current = false;
+      return;
+    }
+    onTap?.();
+  }, [onTap]);
+
   return {
     ref: elementRef,
-    handlers: { onTouchStart, onTouchMove, onTouchEnd },
+    handlers: { onTouchStart, onTouchMove, onTouchEnd, onClick },
   };
 }
